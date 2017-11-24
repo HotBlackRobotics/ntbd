@@ -10,6 +10,7 @@
 
 FROM  hbrobotics/ros-base:rpi3
 
+
 SHELL ["/bin/bash","-c"]
 
 #-------------- Install necessary system packages/tools -----------
@@ -28,16 +29,13 @@ COPY ./NTBD_viz/default /etc/nginx/sites-enabled/default
 #-------------- Install necessary ROS packages --------------------
 RUN source /opt/ros/kinetic/setup.bash &&\
     mkdir -p /catkin_ws/src && cd /catkin_ws/src &&\
-    catkin_init_workspace &&\
-    cd .. && catkin_make
+    catkin_init_workspace
 
 #--------------ROS packages ---------------
 COPY ./ntbd_msgs/ /catkin_ws/src/ntbd_msgs/
 COPY ./ntbd_core/ /catkin_ws/src/ntbd_core/
 
-RUN . /catkin_ws/devel/setup.bash &&\
-    cd /catkin_ws/ && catkin_make 
-RUN . /opt/ros/kinetic/setup.bash
+RUN source /opt/ros/kinetic/setup.bash && cd /catkin_ws/ && catkin_make 
 
 
 COPY ./NTBD_base_entrypoint.sh /
