@@ -1,0 +1,37 @@
+#!/usr/bin/env python
+# license removed for brevity
+import rospy
+#import math
+#import numpy
+from ntbd_msgs.msg import Motors_Array
+
+pub = rospy.Publisher('motors',  Motors_Array, queue_size=10)
+
+def callback(motors_nolim):
+    motors_val = [value for value in motors_nolim.data]
+    motors_llim = rospy.get_param('motors_limiter/motors_llim')
+    motors_ulim = rospy.get_param('motors_limiter/motors_ulim')
+    
+# Motors lower limits: 
+    i = 0
+    for llim in motors_llim:
+        if motors_val[i] < llim:
+            motors_val[i] = llim
+        i = i + 1
+
+# Motors upper limits:
+    j = 0
+    for ulim in motors_ulim:
+        if motors_val[j] > ulim:
+            motors_val[j] = ulim
+        j = j + 1    
+
+    pub.publish(motors_val)
+    
+def listener():
+    rospy.init_node('motors_limiter', anonymous=True)
+    rospy.Subscriber("motors_nolim", Motors_Array, callback)
+    rospy.spin()
+
+if __name__ == '__main__':
+    listener()

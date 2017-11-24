@@ -1,0 +1,60 @@
+<launch>
+<!-- Run serial node initialization -->
+        <arg name="baud" default="115200"/>
+        <arg name="port" default="/dev/ttyACM0"/> 
+
+        <node pkg="rosserial_python" type="serial_node.py" name="init_serial_node">
+            <param name="baud" value="$(arg baud)"/>
+            <param name="port" value="$(arg port)"/>
+        </node>
+
+<!-- ################################################### --> 
+<!-- NTBD nodes launch and ROS Parameters Loading -->
+
+    <!--Run position_limiter.py node and set limits-->
+        <node pkg="ntbd_core" type="position_limiter" name="position_limiter">
+        <!-- Position lower limit values -->  
+            <rosparam param="position_llim">[100, -100, 100]</rosparam>
+        <!-- Position lower limit values --> 
+            <rosparam param="position_ulim">[250, 100, 250]</rosparam>
+        </node>
+
+    <!--Run motors_limiter.py node and set limits-->
+        <node pkg="ntbd_core" type="motors_limiter" name="motors_limiter">
+        <!-- Motors lower limit values -->
+            <rosparam param="motors_llim">[0, 55, 20]</rosparam>
+        <!-- Motors upper limit values -->
+            <rosparam param="motors_ulim">[180, 145, 110]</rosparam>
+        </node>
+
+    <!--Run path_planner.py node -->
+        <node pkg="ntbd_core" type="path_planner" name="path_planner"/>
+<!-- ################################################### -->
+<!-- NTBD abstract nodes launch -->
+
+    <!--Run IK.py node -->
+        <node pkg="ntbd_core" type="IK" name="IK"/>
+
+    <!--Run motors_values.py node -->
+        <node pkg="ntbd_core" type="motors_values" name="motors_values"/>
+
+    <!--Run FK.py node -->
+        <node pkg="ntbd_core" type="FK" name="FK"/>
+
+    <!--Run physical_2_visual.py node -->
+        <node pkg="ntbd_core" type="physical_2_visual" name="physical_2_visual"/>
+<!-- ################################################### -->
+<!-- URDF Loading -->
+
+    <!-- Set manipulator URDF file on ROS Parameter Server -->
+     	<param name="robot_description" command="$(find xacro)/xacro --inorder $(find manipulator_urdf)/urdf/siBOT_noEE.urdf"/>
+
+<!-- Launch Necessary Nodes for Rosbridge connection -->
+
+ 	<node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher"/>
+
+ 	<node pkg="tf2_web_republisher" type="tf2_web_republisher" name="tf2_web_republisher"/>
+
+	<include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
+
+</launch>

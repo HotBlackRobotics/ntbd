@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+
+<script src="./roswebconsole/js/ros/three/three.min.js"></script>
+<script src="./roswebconsole/js/ros/ColladaLoader/ColladaLoader.min.js"></script>
+<script src="./roswebconsole/js/ros/STLLoader/STLLoader.min.js"></script>
+<script src="./roswebconsole/js/ros/eventemitter2/eventemitter2.js"></script>
+<script src="./roswebconsole/js/ros/roslibjs/roslib.js"></script>
+<script src="./roswebconsole/js/ros/ros3djs/ros3d.js"></script>
+</head>
+
+ <!-- slider style -->
+<style>
+
+body { 
+  width: 100%;
+  height:100%;
+  font-family: 'Open Sans', sans-serif;
+  background: #97CAF9;
+}
+
+.xslider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 25px;
+    background: #ff7f7f; 
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+}
+
+.xslider:hover {
+    opacity: 1;
+}
+
+.xslider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    background: #ff0000;
+    cursor: pointer;
+}
+
+.xslider::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    background: #ff0000;
+    cursor: pointer;
+}
+
+
+.yslider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 25px;
+    background: #7fff7f; 
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+}
+
+.yslider:hover {
+    opacity: 1;
+}
+
+.yslider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    background: #007f00;
+    cursor: pointer;
+}
+
+.yslider::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    background: #007f00;
+    cursor: pointer;
+}
+
+
+.zslider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 25px;
+    background: #add8e6; 
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+}
+
+.zslider:hover {
+    opacity: 1;
+}
+
+.zslider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    background: #0000ff;
+    cursor: pointer;
+}
+
+.zslider::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    background: #0000ff;
+    cursor: pointer;
+}
+</style>
+
+<!--HTML -->
+<body onload="init()">
+  <h1>siBOT-HBRemote LAB</h1>
+  <p>1) Drag the slider to set the position (x,y,z) you want siBOT to reach and choose the gripper status<br> 
+   2) Press the "Execute" button to see siBOT reach the set position.<br>
+  Press the Home button to set the siBOT home position</p>
+  <button id="home" onclick="home()">Home</button>
+  
+
+<div id="urdf"> </div>
+
+<div id = "sliders">
+  <div style='float: left;' id="xslidecontainer">
+    <input type="range" min="100" max="250" value="150" class="xslider" id="x">
+    <p>x: <span id="xVal"></span></p>
+  </div>
+
+  <div style='float: left;' id="yslidecontainer">
+    <input type="range" min="-100" max="100" value="0" class="yslider" id="y">
+    <p>y: <span id="yVal"></span></p>
+  </div>
+
+  <div style='float: left;' id="zslidecontainer">
+    <input type="range" min="100" max="250" value="235" class="zslider" id="z">
+    <p>z: <span id="zVal"></span></p>
+  </div>  
+</div>
+
+<button id="gripper" onclick="action()">gripper is open</button>
+<button onclick="pubPos()">Execute</button>
+
+<!-- Script of things to do in html body -->
+<script>
+
+var xslider = document.getElementById("x");
+var yslider = document.getElementById("y");
+var zslider = document.getElementById("z");
+
+var x = document.getElementById("xVal");
+var y = document.getElementById("yVal");
+var z = document.getElementById("zVal");
+
+x.innerHTML = xslider.value;
+y.innerHTML = yslider.value;
+z.innerHTML = zslider.value;
+
+xslider.oninput = function() {
+  x.innerHTML = this.value;
+}
+
+yslider.oninput = function() {
+  y.innerHTML = this.value;
+}
+
+zslider.oninput = function() {
+  z.innerHTML = this.value;
+}
+
+/**
+   * Setup all visualization elements when the page is loaded.
+   */
+   var ros = new ROSLIB.Ros({
+      url : 'ws://localhost:9090'
+    });
+
+   var viewer = new ROS3D.Viewer({
+      divID : 'urdf',
+      width : 800,
+      height : 400, //600
+      antialias : true
+    });
+
+   // Add a grid.
+    viewer.addObject(new ROS3D.Grid());
+
+    // Setup a client to listen to TFs.
+    var tfClient = new ROSLIB.TFClient({
+      ros : ros,
+      angularThres : 0.01,
+      transThres : 0.01,
+      rate : 10.0
+    });
+
+    // Setup the URDF client.
+    var urdfClient = new ROS3D.UrdfClient({
+      ros : ros,
+      tfClient : tfClient,
+      path : 'http://localhost:1234/',
+      rootObject : viewer.scene,
+      //loader : ROS3D.STL_LOADER
+      loader : ROS3D.COLLADA_LOADER
+    });
+
+// Set position by publishing
+var desP = new ROSLIB.Topic({
+    ros : ros,
+    name : '/desP_nointerp',
+    messageType : 'geometry_msgs/Point'
+  });
+
+  var pos = new ROSLIB.Message({ 
+      x : Number(x.innerHTML),
+      y : Number(y.innerHTML),
+      z : Number(z.innerHTML)
+  });
+
+ desP.publish(pos);
+
+// Publish update of positions
+function pubPos() {
+ // Publishing a Topic -------
+ var posUp = new ROSLIB.Message({ 
+      x : Number(x.innerHTML),
+      y : Number(y.innerHTML),
+      z : Number(z.innerHTML)
+  });
+desP.publish(posUp);
+}
+
+// Set gripper status
+var gripstat = new ROSLIB.Topic({
+    ros : ros,
+    name : '/gripper_status',
+    messageType : 'std_msgs/String'
+  });
+
+  var s = new ROSLIB.Message({ 
+      data : 'open'
+  });
+
+ gripstat.publish(s);
+
+// Publish update of gripper status
+function action() {
+  var change = document.getElementById("gripper");
+  if (change.innerHTML == "gripper is open")
+    { 
+      change.innerHTML = "gripper is closed";
+      var s = new ROSLIB.Message({ 
+       data : 'closed'
+      });
+      gripstat.publish(s);
+    }
+  // Gripper is open and you want to close it
+  else {
+      change.innerHTML = "gripper is open";
+      var s = new ROSLIB.Message({ 
+       data : 'open'
+      });
+      gripstat.publish(s);
+  }
+}
+
+//Set home position
+function home() {
+ // Publishing a Topic -------
+ var home = new ROSLIB.Message({ 
+      x : 150,
+      y : 0,
+      z : 235
+  });
+desP.publish(home);
+
+var s = new ROSLIB.Message({ 
+      data : 'open'
+  });
+
+ gripstat.publish(s);
+}
+
+</script>
+</body>
+</html>
+

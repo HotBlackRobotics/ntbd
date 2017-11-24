@@ -1,0 +1,71 @@
+#!/usr/bin/env python
+# license removed for brevity
+import rospy
+import math
+from geometry_msgs.msg import Point
+import time
+
+# Vector distance:
+def coord_distance_AB(a,b):
+    d = Point()
+    d.x = abs(b.x-a.x) 
+    d.y = abs(b.y-a.y)
+    d.z = abs(b.z-a.z)
+    return d
+# Vector magnitude:
+def magnitude(v):
+    return math.sqrt(v.x*v.x + v.y*v.y + v.z*v.z)
+
+pub = rospy.Publisher('desired_position', Point, queue_size=20)
+
+i = 0
+pointA = Point()
+pointB = Point()
+
+def callback(data):
+    N = 20
+    global i
+    i += 1
+    if i == 1:
+        global pointA
+        pointA = data
+        pub.publish(pointA)
+    else: 
+        global pointB
+        pointB = data
+        d = coord_distance_AB(pointA, pointB)
+        if d.x == 0 and d.y == 0 and d.z == 0:
+            pointA = pointB
+            pub.publish(pointA)
+        else:
+            for i in range(1,N+1):
+
+                P = Point()
+
+                if pointA.x < pointB.x:
+                    P.x = pointA.x + d.x/N
+                else:
+                    P.x = pointA.x - d.x/N
+
+                if pointA.y < pointB.y:
+                    P.y = pointA.y + d.y/N
+                else:
+                    P.y = pointA.y - d.y/N
+
+                if pointA.z < pointB.z:
+                    P.z = pointA.z + d.z/N
+                else:
+                    P.z = pointA.z - d.z/N
+                pub.publish(P)
+                pointA = P
+                i += 1
+                time.sleep(0.05)
+
+
+def listener():
+    rospy.init_node('path_planner', anonymous=True)
+    rospy.Subscriber("desired_position_nointerp", Point, callback)
+    rospy.spin()
+
+if __name__ == '__main__':
+    listener()

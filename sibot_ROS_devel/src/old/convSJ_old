@@ -1,0 +1,34 @@
+#!/usr/bin/env python
+# license removed for brevity
+import rospy
+import math
+import numpy
+from sibot_msgs.msg import Servo_Array
+from sensor_msgs.msg import JointState
+from geometry_msgs.msg import Vector3
+
+# Joint 1 visualized value to actual motor value:
+def j1v2m(a):
+    return (a*2)+90
+# Motor joint value (actual) to visualized value:
+
+pub = rospy.Publisher('joint_states', JointState, queue_size=10)
+
+def callback(servoA):
+    joints = JointState()
+    joints.header.stamp = rospy.Time.now() 
+    # joints.name =  ['joint_1', 'joint_2', 'joint_3','joint_4']
+    joints.name =  ['joint_1', 'joint_2', 'joint_3']
+    #Joint 1 has to be put to negative since in reality joint revolutes in one direction but the gear makes it revolute in the other
+    #joints.position = [-(90 - servoA.data[0])/2, 90 - 180 + servoA.data[1], 90 - servoA.data[2], -(90 - 180 + servoA.data[1])]
+    joints.position = [-(90 - servoA.data[0])/2, 90 - 180 + servoA.data[1], 90 - servoA.data[2]]
+    joints.position = [joint*math.pi/180 for joint in joints.position]
+    pub.publish(joints)
+
+def listener():
+    rospy.init_node('convSJ', anonymous=True)
+    rospy.Subscriber("servo", Servo_Array, callback)
+    rospy.spin()
+
+if __name__ == '__main__':
+    listener()

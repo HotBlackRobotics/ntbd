@@ -1,0 +1,66 @@
+#!/usr/bin/env python
+# license removed for brevity
+import rospy
+import math
+from sibot_msgs.msg import Servo_Array
+from geometry_msgs.msg import Point
+
+#Hipotenusa:
+def hipo(x,y):
+    return math.sqrt(x*x + y*y)
+#Cosines law:
+def lawOfCosines(a,b,c):
+    rate = (a*a + b*b - c*c) / (2 * a * b)
+    if abs(rate) > 1:
+        if max(rate,0) == 0:
+            rate = -1
+        if max(rate,0) == rate:
+            rate = 1
+    return math.acos(rate)
+
+def deg(rad):
+    return rad * 180 / math.pi
+
+#Arm parameters
+#b = 5.0
+#l1 = 4.0 #First link lenght
+#L1 = b+l1
+#Lenghts expressed in millimeters
+L0 = 50
+L1 = 35
+L2 = 150 # [cm], Second link lenght
+L3 = 150 # [cm], Third link lenght
+
+# global angles
+angles = [90, 90, 90]#{'M1':90, 'M2':90,'M3':90}] default/starting position
+pub = rospy.Publisher('servo_nolim', Servo_Array, queue_size=10)
+
+def callback(data):
+    #Desired position,cartesian coordinates taken from Point message
+    cartP = {'xEE':data.x, 'yEE': data.y, 'zEE': data.z}
+    # Desired position,cylindrical coordinates
+    L = L0+L1
+    cylP = {'theta': math.atan(cartP['yEE']/cartP['xEE']), 'r':hipo(cartP['xEE'], cartP['yEE']), 'zhat':cartP['zEE']-L}
+    #z = cylP['zEE']-L1
+    zhat = cylP['zhat']
+    rho = hipo(cylP['r'], zhat)
+    global angles
+    M1 = 2*cylP['theta'] + math.pi/2
+    M2 = math.atan(zhat/cylP['r']) + lawOfCosines(L2,rho,L3)
+    M3 = M2 + lawOfCosines(L2,L3,rho) - math.pi/2
+    #Physical adjustments
+    angles = [M1,math.pi - M2,M3]
+    angles = [deg(angle) for angle in angles]
+    #print(angles)
+    pub.publish(angles)
+
+def listener():
+    rospy.init_node('pos2servo', anonymous=True)
+    rospy.Subscriber("desP", Point, callback)
+    #Start position
+    #pub.publish([angles['M1'],angles['M2'],angles['M3']])
+    #pub.publish(angles)
+    rospy.spin()
+
+if __name__ == '__main__':
+    listener()

@@ -1,0 +1,47 @@
+<launch>
+        <!-- Run serial node initialization -->
+        <arg name="baud" default="115200"/>
+        <arg name="port" default="/dev/ttyACM0"/>
+
+        <node pkg="rosserial_python" type="serial_node.py" name="init_serial_node">
+                <param name="baud" value="$(arg baud)"/>
+                <param name="port" value="$(arg port)"/>
+        </node>
+
+    <!--Run IK.py node -->
+        <node pkg="sibot_core" type="IK" name="inv_kin_node"/>
+
+	<!--Run posGen.py node 
+        <node pkg="sibot_core" type="posGen" name="pos_gen_node"/>-->
+
+	<!--Run convSJ.py node -->
+        <node pkg="sibot_core" type="convSJ" name="conversion_S2J"/>
+
+    <!--Run limitJ.py node -->
+        <node pkg="sibot_core" type="limitJ" name="limit_J"/>
+
+    <!--Run interpP.py node -->
+        <node pkg="sibot_core" type="interpP" name="interp_P"/>
+
+    <!--Run FK.py node -->
+        <node pkg="sibot_core" type="FK" name="forw_kin_node"/>
+
+    <!--Run gripper.py node -->
+        <node pkg="sibot_core" type="gripper" name="gripper_node"/>
+
+  	<!-- ##########################	ROS3DJS URDF ########################## -->
+	<!-- send sibot urdf to param server -->
+
+ 	<param name="robot_description" command="$(find xacro)/xacro --inorder $(find sibot_urdf)/urdf/my_sibot_urdf_noEE.urdf"/>
+
+ 	<node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher"/>
+
+ 	<!-- param name="use_gui" value="true" />-->
+
+ 	<!-- <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher" /> -->
+
+ 	<node pkg="tf2_web_republisher" type="tf2_web_republisher" name="tf2_web_republisher"/>
+
+	<include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
+
+</launch>
