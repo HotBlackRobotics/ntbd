@@ -11,7 +11,7 @@ gripper = 180
 def callback_grip(value):
     global gripper
     if value.data == 'closed':
-        gripper = 110;
+        gripper = 60;
     if value.data == 'open':
         gripper = 180;
 

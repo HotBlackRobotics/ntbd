@@ -1,0 +1,28 @@
+# https://docs.docker.com/compose/yml/
+# Each service defined in docker-compose.yml must specify exactly one of
+# image or build. Other keys are optional, and are analogous to their
+# docker run command-line counterparts.
+#
+# As with docker run, options specified in the Dockerfile (e.g., CMD,
+# EXPOSE, VOLUME, ENV) are respected by default - you don't need to
+# specify them again in docker-compose.yml.
+#
+service_name:
+  # Path to a directory containing a Dockerfile. When the value supplied
+  #build: ./
+  # Tag or partial image ID. Can be local or remote - Compose will
+  # attempt to pull if it doesn't exist locally.
+  image: ntbd/manipulator:rpi3
+  container_name: ntbd_manipulator_rpi3
+  ports:
+    - "80:80"
+  # A single value, analogous to its docker run counterpart.
+  privileged: true
+  # Mount paths as volumes, optionally specifying a path on the host machine
+  # (HOST:CONTAINER), or an access mode (HOST:CONTAINER:ro).
+  devices:
+    - "/dev/ttyACM0:/dev/ttyACM0"
+  volumes:
+    - /tmp/.X11-unix:/tmp/.X11-unix:ro
+  environment:
+    - DISPLAY=$DISPLAY 
