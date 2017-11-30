@@ -5,6 +5,8 @@ import rospy
 #import numpy
 from geometry_msgs.msg import Point
 
+pub = rospy.Publisher('desired_position_nointerp', Point, queue_size=10)
+
 def callback(position_nolim):
     position_val = [position_nolim.x, position_nolim.y, position_nolim.z]
     position_llim = rospy.get_param('position_limiter/position_llim')
@@ -23,9 +25,14 @@ def callback(position_nolim):
         if position_val[j] > ulim:
             position_val[j] = ulim
         j = j + 1    
-
-    pub.publish(position_val)
     
+    pos = Point()
+    pos.x = position_val[0]
+    pos.y = position_val[1]
+    pos.z = position_val[2]
+
+    pub.publish(pos)
+        
 def listener():
     rospy.init_node('position_limiter', anonymous=True) 
     rospy.Subscriber("desired_position_nolim", Point, callback)
@@ -33,5 +40,3 @@ def listener():
 
 if __name__ == '__main__':
     listener()
-
-pub = rospy.Publisher('desired_position_nointerp', Point, queue_size=10)

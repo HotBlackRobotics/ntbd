@@ -18,12 +18,11 @@
         messageType : 'geometry_msgs/Point'
       });
 
-      var grippterTopic = new ROSLIB.Topic({
+      var gripperTopic = new ROSLIB.Topic({
         ros : ros,
         name : '/gripper_value',
         messageType : 'std_msgs/String'
       });
-
 
       var msg = {
         x: 150,
@@ -67,9 +66,9 @@
 
               let index_angle = Math.acos(Leap.vec3.dot(hand.direction, hand.indexFinger.direction))*180/Math.PI;
               if (index_angle > 100) {
-                grippterTopic.publish({data:  "closed"})
+                gripperTopic.publish({data:  "closed"})
               } else if (index_angle < 80) {
-                grippterTopic.publish({data:  "open"})
+                gripperTopic.publish({data:  "open"})
               }
 
             }

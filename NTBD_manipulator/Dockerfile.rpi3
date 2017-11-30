@@ -9,7 +9,7 @@
 #   docker build -t ntbd/manipulator:rpi3 .
 ############################################################
 
-FROM  ntbd/base:rpi3
+FROM  hbrobotics/ntbd_base:rpi3
 
 SHELL ["/bin/bash","-c"]
 
@@ -32,4 +32,4 @@ RUN . /catkin_ws/devel/setup.bash &&\
 COPY ./NTBD_entrypoint.sh /
 RUN ["chmod", "+x", "/NTBD_entrypoint.sh"]
 ENTRYPOINT ["/NTBD_entrypoint.sh"]
-CMD ["bash"]
+CMD roslaunch ntbd_core NTBD_launch.launch

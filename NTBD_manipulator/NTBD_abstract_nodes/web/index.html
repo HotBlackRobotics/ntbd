@@ -156,6 +156,8 @@ var x = document.getElementById("xVal");
 var y = document.getElementById("yVal");
 var z = document.getElementById("zVal");
 
+var gripper = document.getElementById("gripper");
+
 x.innerHTML = xslider.value;
 y.innerHTML = yslider.value;
 z.innerHTML = zslider.value;
@@ -210,7 +212,7 @@ zslider.oninput = function() {
 // Set position by publishing
 var desP = new ROSLIB.Topic({
     ros : ros,
-    name : '/desired_position_nointerp',
+    name : '/desired_position_nolim',
     messageType : 'geometry_msgs/Point'
   });
 
@@ -248,10 +250,9 @@ var gripval = new ROSLIB.Topic({
 
 // Publish update of gripper status
 function action() {
-  var change = document.getElementById("gripper");
-  if (change.innerHTML == "gripper is open")
+  if (gripper.innerHTML == "gripper is open")
     { 
-      change.innerHTML = "gripper is closed";
+      gripper.innerHTML = "gripper is closed";
       var s = new ROSLIB.Message({ 
        data : 'closed'
       });
@@ -259,7 +260,7 @@ function action() {
     }
   // Gripper is open and you want to close it
   else {
-      change.innerHTML = "gripper is open";
+      gripper.innerHTML = "gripper is open";
       var s = new ROSLIB.Message({ 
        data : 'open'
       });
@@ -277,12 +278,18 @@ function home() {
   });
 desP.publish(home);
 
+// Update sliders values
 x.innerHTML = 150;
 y.innerHTML = 0;
 z.innerHTML = 235;
+// Update sliders positions
+xslider.value = x.innerHTML;
+yslider.value = y.innerHTML;
+zslider.value = z.innerHTML; 
+// Update gripper button
+//var change = document.getElementById("gripper");
+gripper.innerHTML = "gripper is open";
 
-var change = document.getElementById("gripper");
-  change.innerHTML = "gripper is open";
 var s = new ROSLIB.Message({ 
       data : 'open'
   });
