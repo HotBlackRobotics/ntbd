@@ -9,6 +9,10 @@
 <script src="./roswebconsole/js/ros/eventemitter2/eventemitter2.js"></script>
 <script src="./roswebconsole/js/ros/roslibjs/roslib.js"></script>
 <script src="./roswebconsole/js/ros/ros3djs/ros3d.js"></script>
+<!--Leap motion needed scripts>-->
+<!--<script src="./roswebconsole/js/leapjs/leap-0.6.4.js"></script>
+<script src="./roswebconsole/js/ros/eventemitter2/eventemitter2.js"></script>
+<script src="./roswebconsole/js/ros/roslibjs/roslib.js"></script><!-->
 </head>
 
  <!-- slider style -->
@@ -115,8 +119,8 @@ body {
 </style>
 
 <!--HTML -->
-<body onload="init()">
-  <h1>NTBD - Visualizer</h1>
+<body>
+  <h1>NTBD - Visualizer and NTBD - Leap Motion WebApps</h1>
   <p>1) Drag the slider to set the position (x,y,z) you want your manipulator to reach and choose the gripper status<br> 
    2) Press the "Execute" button to see the manipulator reach the set position.<br>
   Press the Home button to let your manipulator go to the home position</p>
@@ -148,6 +152,7 @@ body {
 <!-- Script of things to do in html body -->
 <script>
 
+// SIMULATION
 var xslider = document.getElementById("x");
 var yslider = document.getElementById("y");
 var zslider = document.getElementById("z");
@@ -236,7 +241,7 @@ desP.publish(posUp);
 }
 
 // Set gripper status
-var gripval = new ROSLIB.Topic({
+var gripperTopic = new ROSLIB.Topic({
     ros : ros,
     name : '/gripper_value',
     messageType : 'std_msgs/String'
@@ -246,7 +251,7 @@ var gripval = new ROSLIB.Topic({
       data : 'open'
   });
 
- gripval.publish(s);
+ gripperTopic.publish(s);
 
 // Publish update of gripper status
 function action() {
@@ -256,7 +261,7 @@ function action() {
       var s = new ROSLIB.Message({ 
        data : 'closed'
       });
-      gripval.publish(s);
+      gripperTopic.publish(s);
     }
   // Gripper is open and you want to close it
   else {
@@ -264,7 +269,7 @@ function action() {
       var s = new ROSLIB.Message({ 
        data : 'open'
       });
-      gripval.publish(s);
+      gripperTopic.publish(s);
   }
 }
 
@@ -294,9 +299,74 @@ var s = new ROSLIB.Message({
       data : 'open'
   });
 
- gripval.publish(s);
+ gripperTopic.publish(s);
 }
 
+/* // LEAP MOTION
+var desP_nointerp = new ROSLIB.Topic({
+    ros : ros,
+    name : '/desired_position',
+    messageType : 'geometry_msgs/Point'
+  });
+
+// Gripper topics already defined
+
+var hand_start_pos = undefined;
+
+      Leap.loop({loopWhileDisconnected:false},{
+        frame: function(frame){
+          let hand = frame.hands[0];
+          if (hand){
+
+            if (hand.type == 'right') {
+              if (hand_start_pos == undefined) {
+                hand_start_pos = hand.palmPosition;
+              }
+              pos = hand.palmPosition;
+
+              var poss = {
+                y: -(pos[0] - hand_start_pos[0])/3,
+                z: (pos[1] - hand_start_pos[1])/5 + 200,
+                x: -(pos[2] - hand_start_pos[2])/5 +100
+              }
+              // Update sliders values
+              x.innerHTML = poss.x;
+              y.innerHTML = poss.y;
+              z.innerHTML = poss.z;
+              // Update sliders positions
+              xslider.value = x.innerHTML;
+              yslider.value = y.innerHTML;
+              zslider.value = z.innerHTML;
+
+              if (poss.x < 100) {poss.x = 100}
+              else if (poss.x > 300) {poss.x= 300}
+
+              if (poss.y < -100) { poss.y= -100 }
+              else if (poss.y > 100) { poss.y = 100 }
+
+              if (poss.z < 100) {poss.z = 100}
+              else if (poss.z > 300) {poss.z = 300}
+
+              console.log(poss);
+
+              desP_nointerp.publish(poss);
+
+              let index_angle = Math.acos(Leap.vec3.dot(hand.direction, hand.indexFinger.direction))*180/Math.PI;
+              if (index_angle > 100) {
+                gripperTopic.publish({data:  "closed"})
+                // Update gripper button
+                gripper.innerHTML = "gripper is closed";
+              } else if (index_angle < 80) {
+                gripperTopic.publish({data:  "open"})
+                // Update gripper button
+                gripper.innerHTML = "gripper is open";
+              }
+
+            }
+          }
+        }
+      });
+*/
 </script>
 <a href="/ntbd_lm.html" target="_blank" type="button"> NTBD Leap Motion WebApp </a>
 </body>

@@ -6,14 +6,14 @@ from std_msgs.msg import String
 
 pub = rospy.Publisher('motors_nolim', Motors_Array, queue_size=10)
 global gripper
-gripper = 180
+gripper = 90
 
 def callback_grip(value):
     global gripper
     if value.data == 'closed':
-        gripper = 60;
+        gripper = 25;
     if value.data == 'open':
-        gripper = 180;
+        gripper = 100;
 
 def callback_motors(motors_val):
     motors_val_nolim = [motors_val.data[0], motors_val.data[1], motors_val.data[2], gripper]
