@@ -1,0 +1,19 @@
+service_name:
+  # Path to a directory containing a Dockerfile. When the value supplied
+  #build: ./
+  # Tag or partial image ID. Can be local or remote - Compose will
+  # attempt to pull if it doesn't exist locally.
+  image: hbrobotics/ntbd_manipulator:intel
+  container_name: hbr_ntbd_manipulator_intel
+  ports:
+    - "80:80"
+  # A single value, analogous to its docker run counterpart.
+  privileged: true
+  # Mount paths as volumes, optionally specifying a path on the host machine
+  # (HOST:CONTAINER), or an access mode (HOST:CONTAINER:ro).
+  devices:
+    - "/dev/ttyACM0:/dev/ttyACM0"
+  volumes:
+    - /tmp/.X11-unix:/tmp/.X11-unix:ro
+  environment:
+    - DISPLAY=$DISPLAY 
