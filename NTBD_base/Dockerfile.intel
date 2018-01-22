@@ -5,7 +5,7 @@
 #    - All NTBD necessary ROS Nodes
 #
 # To build the image, in:
-#   docker build -t ntbd/base:intel .
+#   docker build -f ./Dockerfile.intel -t ntbd/base:intel .
 ############################################################
 
 FROM  hbrobotics/ros-base:intel

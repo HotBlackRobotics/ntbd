@@ -5,11 +5,11 @@
 #    - All NTBD necessary ROS Nodes
 #    - All NTBD abstract ROS Nodes for the chosen manipulator
 #
-# To build the image, in:
-#   docker build -t ntbd/manipulator:rpi3 .
+# To build the image:
+# 	docker build -f ./Dockerfile.rpi3 -t ntbd/manipulator:rpi3 .
 ############################################################
 
-FROM  hbrobotics/ntbd_base:rpi3
+FROM  ntbd/base:rpi3
 
 SHELL ["/bin/bash","-c"]
 

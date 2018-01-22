@@ -5,8 +5,8 @@
 #    - All NTBD necessary ROS Nodes
 #    - All NTBD abstract ROS Nodes for the chosen manipulator
 #
-# To build the image, in:
-#   docker build -t ntbd/manipulator:intel .
+# To build the image:
+#   docker build -f ./Dockerfile.intel -t ntbd/manipulator:intel .
 ############################################################
 
 FROM  ntbd/base:intel

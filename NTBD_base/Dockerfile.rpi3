@@ -4,13 +4,23 @@
 #    - All needed system and ROS packages
 #    - All NTBD necessary ROS Nodes
 #
-# To build the image, in:
-#   docker build -t ntbd/base:rpi3 .
+# The base image must have the QEMU binary
+#
+# Installed qemu
+#   sudo apt-get install qemu qemu-user-static binfmt-support -y
+#
+# Register QEMU in the build agent
+#   docker run --rm --privileged multiarch/qemu-user-static:register --reset
+#
+# To build the image:
+#   docker build -f ./Dockerfile.rpi3 -t ntbd/base:rpi3 .
 ############################################################
 
 FROM  hbrobotics/ros-base:rpi3
 
 SHELL ["/bin/bash","-c"]
+
+COPY ./qemu-arm-static /usr/bin/qemu-arm-static
 
 # -------------- Install necessary system packages/tools -----------
 RUN apt-get update -y && apt-get install ros-kinetic-rosserial \
