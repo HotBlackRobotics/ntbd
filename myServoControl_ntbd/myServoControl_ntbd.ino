@@ -1,16 +1,12 @@
-/*
- * rosserial Servo Control Example
- *
- * This sketch demonstrates the control of hobby R/C servos
- * using ROS and the arduiono
+/* NTBD integration with siBOT
+ * Servo motors control exploiting rosserial
  * 
- * For the full tutorial write up, visit
- * www.ros.org/wiki/rosserial_arduino_demos
- *
- * For more information on the Arduino Servo Library
- * Checkout :
- * http://www.arduino.cc/en/Reference/Servo
+ * Author: fiorella.sibona@gmail.com
+ * 
+ * RMK: If you are using an Arduino Mega Board:
+ *      in directory sketch_folder/libraries/ros_lib, open file "ArduinoHardware.h" and set baud= 115200 anywhere baud appears 
  */
+ 
 #include <Servo.h> 
 #include <ros.h>
 #include <ntbd_msgs/Motors_Array.h>
@@ -35,8 +31,7 @@ ros::Subscriber<ntbd_msgs::Motors_Array> sub("motors", servos_cb);
 
 // Arduino setup function
 void setup(){
-  pinMode(13, OUTPUT);
-  
+    
   nh.initNode();
   nh.subscribe(sub);
   
@@ -44,9 +39,13 @@ void setup(){
   servo2.attach(3);
   servo3.attach(4);
   servo4.attach(5);
+  
 }
 
+// Arduino loop function
 void loop(){
+  
   nh.spinOnce();
   delay(1);
+  
 }
