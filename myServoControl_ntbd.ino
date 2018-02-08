@@ -3,7 +3,7 @@
  * 
  * Author: fiorella.sibona@gmail.com
  * 
- * RMK: If you are using an Arduino Mega Board:
+ * RMK: In my project I have used a baud of 115200, to correctly compile:
  *      in directory sketch_folder/libraries/ros_lib, open file "ArduinoHardware.h" and set baud= 115200 anywhere baud appears 
  */
  
