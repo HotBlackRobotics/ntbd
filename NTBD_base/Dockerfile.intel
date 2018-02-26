@@ -12,7 +12,7 @@ FROM  hbrobotics/ros-base:intel
 
 SHELL ["/bin/bash","-c"]
 
-#-------------- Install necessary system packages/tools -----------
+#-------------- Install necessary ROS packages and system packages/tools -----------
 RUN apt-get update -y && apt-get install ros-kinetic-rosserial \
         ros-kinetic-robot-state-publisher \
         ros-kinetic-joint-state-publisher \
@@ -25,12 +25,12 @@ RUN apt-get install nginx -y
 RUN rm /etc/nginx/sites-enabled/*
 COPY ./nginx/nginx.conf /etc/nginx/sites-enabled/nginx
 
-#-------------- Install necessary ROS packages --------------------
+#-------------- Catkin workspace creation --------------------
 RUN source /opt/ros/kinetic/setup.bash &&\
     mkdir -p /catkin_ws/src && cd /catkin_ws/src &&\
     catkin_init_workspace 
 
-#--------------ROS packages ---------------
+#--------------Copy ROS packages ---------------
 COPY ./ntbd_msgs/ /catkin_ws/src/ntbd_msgs/
 COPY ./ntbd_core/ /catkin_ws/src/ntbd_core/
 
