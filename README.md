@@ -18,10 +18,9 @@ In order to understand P&P architecure and get info on how to use the code or mo
 * **Fiorella Sibona** - [FiorellaSibona](https://github.com/FiorellaSibona)
 * **Ludovico Orlando Russo** - [ludusrusso](https://github.com/ludusrusso)
 
-<!---## License
- 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details 
-
+## License
+This project is licensed under the BSD-3 License - see the [LICENSE](LICENSE) file for details
+<!---
 ## Acknowledgments
 * 
 * Inspiration
